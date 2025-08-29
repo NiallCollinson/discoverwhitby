@@ -2,8 +2,6 @@ import { createBeds24Adapter, fetchBeds24Properties } from "@discoverwhitby/inte
 import { slugify } from "@/src/lib/slugify";
 import { getLocalCover, getAllLocalPhotos3000 } from "@/src/server/photos/getLocalPhotos";
 import { PropertiesExplorer } from "./components/PropertiesExplorer";
-import dynamic from "next/dynamic";
-const PriceCalendar = dynamic(() => import("@/src/components/PriceCalendar"), { ssr: false });
 
 export default async function Home() {
   const heroVideo = process.env.NEXT_PUBLIC_HERO_VIDEO_URL ?? "/hero-whitby.mp4";
@@ -102,11 +100,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-      <div className="mx-auto max-w-5xl px-6 py-12">
-        <h2 className="mb-4 text-xl font-semibold">Find your dates</h2>
-        <PriceCalendar />
-      </div>
-
       <PropertiesExplorer items={sample} hasDb={hasDb} />
     </main>
   );

@@ -2,6 +2,9 @@
 
 import { useMemo, useState, useEffect } from "react";
 import CardImage from "@/app/components/CardImage";
+import dynamic from "next/dynamic";
+import { useState } from "react";
+const PriceCalendar = dynamic(() => import("@/src/components/PriceCalendar"), { ssr: false });
 
 type PropertyLite = {
   id: string;
@@ -16,6 +19,7 @@ type PropertyLite = {
 export function PropertiesExplorer({ items, hasDb }: { items: PropertyLite[]; hasDb: boolean }) {
   const [query, setQuery] = useState<string>("");
   const [guests, setGuests] = useState<string>("");
+  const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
 
   useEffect(() => {
     try {
@@ -47,9 +51,20 @@ export function PropertiesExplorer({ items, hasDb }: { items: PropertyLite[]; ha
   return (
     <div id="search" className="mx-auto max-w-7xl bg-white px-6 py-12">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
+        <div className="rounded-lg border border-gray-200 bg-white p-4 relative">
           <div className="text-sm font-medium">Dates</div>
-          <input className="mt-2 w-full rounded-md border px-3 py-2" placeholder="Add dates" readOnly />
+          <button
+            type="button"
+            className="mt-2 w-full rounded-md border px-3 py-2 text-left"
+            onClick={() => setCalendarOpen((v) => !v)}
+          >
+            Add dates
+          </button>
+          {calendarOpen ? (
+            <div className="absolute left-0 right-0 z-50 mt-2 rounded-xl border bg-white p-2 shadow-xl">
+              <PriceCalendar />
+            </div>
+          ) : null}
         </div>
         <div className="rounded-lg border border-gray-200 bg-white p-4">
           <div className="text-sm font-medium">Guests</div>
