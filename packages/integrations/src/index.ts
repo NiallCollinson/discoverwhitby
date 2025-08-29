@@ -1,0 +1,4 @@
+export * from "./beds24";
+
+
+

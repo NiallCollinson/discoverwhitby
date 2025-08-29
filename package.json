@@ -1,0 +1,47 @@
+{
+  "name": "discoverwhitby",
+  "version": "0.1.0",
+  "description": "Whitby Holiday Rentals – monorepo for web, worker, and shared packages.",
+  "private": true,
+  "packageManager": "pnpm@9.7.1",
+  "type": "module",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm -r --parallel dev",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "format": "prettier -w .",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "keywords": [],
+  "license": "MIT",
+  "dependencies": {
+    "@next-auth/prisma-adapter": "^1.0.7",
+    "@trpc/client": "^11.4.4",
+    "@trpc/server": "^11.4.4",
+    "bullmq": "^5.17.1",
+    "ioredis": "^5.4.1",
+    "next-auth": "^4.24.7",
+    "superjson": "^2.2.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@prisma/client": "^5.18.0",
+    "prettier": "^3.6.2",
+    "prisma": "^5.18.0",
+    "tsup": "^8.3.0",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2",
+    "vitest": "^2.0.0"
+  }
+}
