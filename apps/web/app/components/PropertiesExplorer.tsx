@@ -3,7 +3,6 @@
 import { useMemo, useState, useEffect } from "react";
 import CardImage from "@/app/components/CardImage";
 import dynamic from "next/dynamic";
-import { useState } from "react";
 const PriceCalendar = dynamic(() => import("@/src/components/PriceCalendar"), { ssr: false });
 
 type PropertyLite = {
@@ -61,8 +60,11 @@ export function PropertiesExplorer({ items, hasDb }: { items: PropertyLite[]; ha
             Add dates
           </button>
           {calendarOpen ? (
-            <div className="absolute left-0 right-0 z-50 mt-2 rounded-xl border bg-white p-2 shadow-xl">
-              <PriceCalendar />
+            <div className="absolute left-0 right-0 mt-2">
+              <div className="fixed inset-0 z-40" onClick={() => setCalendarOpen(false)} />
+              <div className="relative z-50 rounded-xl border bg-white p-2 shadow-xl" onClick={(e) => e.stopPropagation()}>
+                <PriceCalendar numberOfMonths={1} mock={true} onClose={() => setCalendarOpen(false)} />
+              </div>
             </div>
           ) : null}
         </div>
