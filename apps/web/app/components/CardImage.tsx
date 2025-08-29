@@ -23,6 +23,11 @@ export default function CardImage({ slug, alt, cover }: { slug: string; alt: str
   useEffect(() => {
     let cancelled = false;
     async function run() {
+      // If a cover is provided, prefer it and skip manifest lookup
+      if (cover) {
+        setSrc(cover);
+        return;
+      }
       try {
         if (!manifestCache.data && !requested.current) {
           requested.current = true;
@@ -47,7 +52,7 @@ export default function CardImage({ slug, alt, cover }: { slug: string; alt: str
     }
     run();
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, cover]);
 
   return (
     <div className="aspect-video w-full overflow-hidden rounded-md bg-gray-100 relative">

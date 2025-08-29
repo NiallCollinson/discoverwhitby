@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import HamburgerMenu from "@/app/components/HamburgerMenu";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +22,9 @@ export default function RootLayout({
         <header className="border-b relative z-40">
           <div className="mx-auto max-w-7xl px-6 py-4">
             <div className="flex items-center justify-between">
-              <div className="text-lg font-semibold">Discover Whitby</div>
+              <Link href="/" className="text-lg font-semibold hover:opacity-80">
+                Discover Whitby
+              </Link>
               <HamburgerMenu />
             </div>
           </div>

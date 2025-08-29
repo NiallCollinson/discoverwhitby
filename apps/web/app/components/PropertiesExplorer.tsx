@@ -20,9 +20,7 @@ export function PropertiesExplorer({ items, hasDb }: { items: PropertyLite[]; ha
   useEffect(() => {
     try {
       const url = new URL(window.location.href);
-      const qParam = url.searchParams.get("q") ?? "";
       const guestsParam = url.searchParams.get("guests") ?? "";
-      setQuery(qParam);
       setGuests(guestsParam);
     } catch {}
   }, []);
@@ -31,36 +29,24 @@ export function PropertiesExplorer({ items, hasDb }: { items: PropertyLite[]; ha
     try {
       const current = new URL(window.location.href);
       const params = current.searchParams;
-      if (query) params.set("q", query); else params.delete("q");
       if (guests) params.set("guests", guests); else params.delete("guests");
       current.search = params.toString();
       current.hash = "search";
       window.history.replaceState({}, "", current.toString());
     } catch {}
-  }, [query, guests]);
+  }, [guests]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
     const guestsNum = guests ? Number(guests) : undefined;
     return items.filter((p) => {
-      if (q && !p.title.toLowerCase().includes(q)) return false;
       if (guestsNum && Number.isFinite(guestsNum) && p.maxGuests < guestsNum) return false;
       return true;
     });
-  }, [items, query, guests]);
+  }, [items, guests]);
 
   return (
     <div id="search" className="mx-auto max-w-7xl bg-white px-6 py-12">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <div className="text-sm font-medium">Where</div>
-          <input
-            className="mt-2 w-full rounded-md border px-3 py-2"
-            placeholder="Whitby"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
         <div className="rounded-lg border border-gray-200 bg-white p-4">
           <div className="text-sm font-medium">Dates</div>
           <input className="mt-2 w-full rounded-md border px-3 py-2" placeholder="Add dates" readOnly />

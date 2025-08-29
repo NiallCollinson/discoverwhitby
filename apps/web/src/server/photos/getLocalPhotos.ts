@@ -69,6 +69,8 @@ export async function getLocalPhotos(slug: string): Promise<string[]> {
         const all = await listAllImageFilesRecursively(publicDir);
         const rels = all
           .map((abs) => path.relative(publicRoot, abs))
+          // Only include files under a folder whose name contains "3000px"
+          .filter((rel) => rel.split(/[\\/]/).some((seg) => seg.toLowerCase().includes("3000px")))
           .sort(alphaNumSort);
         for (const rel of rels) {
           const url = `/photos/${rel.replace(/\\/g, "/")}`;
@@ -81,6 +83,32 @@ export async function getLocalPhotos(slug: string): Promise<string[]> {
     } catch {}
 
     return results;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Returns all public photo URLs under any folder that includes "3000px" in its name.
+ */
+export async function getAllLocalPhotos3000(): Promise<string[]> {
+  try {
+    const publicRoot = path.resolve(process.cwd(), "public", "photos");
+    const all = await listAllImageFilesRecursively(publicRoot);
+    const rels = all
+      .map((abs) => path.relative(publicRoot, abs))
+      .filter((rel) => rel.split(/[\\/]/).some((seg) => seg.toLowerCase().includes("3000px")))
+      .sort(alphaNumSort);
+    // Deduplicate by basename to avoid near-duplicates across formats
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const rel of rels) {
+      const base = path.basename(rel);
+      if (seen.has(base)) continue;
+      seen.add(base);
+      out.push(`/photos/${rel.replace(/\\/g, "/")}`);
+    }
+    return out;
   } catch {
     return [];
   }

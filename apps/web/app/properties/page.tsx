@@ -1,6 +1,6 @@
 import { createBeds24Adapter, fetchBeds24Properties } from "@discoverwhitby/integrations";
 import { slugify } from "@/src/lib/slugify";
-import { getLocalCover } from "@/src/server/photos/getLocalPhotos";
+import { getLocalCover, getAllLocalPhotos3000 } from "@/src/server/photos/getLocalPhotos";
 import { PropertiesExplorer } from "@/app/components/PropertiesExplorer";
 
 export default async function PropertiesPage() {
@@ -68,7 +68,16 @@ export default async function PropertiesPage() {
     })));
   }
 
-  const hero = properties.find((p) => !!p.coverImage)?.coverImage || "/hero-whitby.mp4";
+  const globalPhotos = await getAllLocalPhotos3000();
+  const hero = (globalPhotos.length ? globalPhotos[Math.floor(Math.random() * globalPhotos.length)] : undefined)
+    || properties.find((p) => !!p.coverImage)?.coverImage
+    || "/hero-whitby.mp4";
+
+  // Randomize card covers from any 3000px photo
+  if (globalPhotos.length) {
+    const pick = () => globalPhotos[Math.floor(Math.random() * globalPhotos.length)];
+    properties = properties.map((p) => ({ ...p, coverImage: pick() }));
+  }
 
   return (
     <main className="min-h-screen">

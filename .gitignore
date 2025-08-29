@@ -43,4 +43,9 @@ dist/
 # Large photo originals (keep 3000px only)
 apps/web/public/photos/**/Full Res/
 apps/web/public/photos/**/FullRes/
+
+# Exclude all photos from repo; keep only manifest.json
+apps/web/public/photos/*
+apps/web/public/photos/*/**
+!apps/web/public/photos/manifest.json
 node_modules

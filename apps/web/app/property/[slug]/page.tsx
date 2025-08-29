@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { createBeds24Adapter, fetchBeds24Properties } from "@discoverwhitby/integrations";
 import { slugify } from "@/src/lib/slugify";
-import { getLocalPhotos, getLocalCover } from "@/src/server/photos/getLocalPhotos";
+import { getLocalPhotos, getLocalCover, getAllLocalPhotos3000 } from "@/src/server/photos/getLocalPhotos";
 import PhotoCarousel from "@/app/components/PhotoCarousel";
 
 export default async function PropertyPage({ params }: { params: { slug: string } }) {
@@ -32,27 +33,34 @@ export default async function PropertyPage({ params }: { params: { slug: string 
       }
     }
     if (!p) {
-      // Last-resort: render page with local photos only
-      const localPhotos = await getLocalPhotos(slug);
-      const hero = localPhotos[0];
+      // Last-resort: render page with local photos only (from any 3000px folder)
+      const localPhotos = await getAllLocalPhotos3000();
+      const hero = localPhotos.length ? localPhotos[Math.floor(Math.random() * localPhotos.length)] : undefined;
+      const gallery = localPhotos.filter((u) => u !== hero);
       if (!hero) return notFound();
       const titleGuess = slug.replace(/-/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
       return (
-        <div className="mx-auto max-w-5xl px-6 py-12">
-          <div className="aspect-video w-full overflow-hidden rounded-lg bg-gray-100">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={hero} alt={titleGuess} className="h-full w-full object-cover" />
+        <>
+          <div className="relative h-96 w-full">
+            <Image src={hero} alt={titleGuess} fill priority sizes="100vw" className="object-cover" />
+            <div className="absolute inset-0 bg-black/40" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <h1 className="px-4 text-center text-3xl font-bold text-white drop-shadow-md">{titleGuess}</h1>
+            </div>
           </div>
-          <h1 className="mt-6 text-2xl font-semibold">{titleGuess}</h1>
-        </div>
+          <div className="mx-auto max-w-5xl px-6 py-12">
+            <PhotoCarousel images={[hero, ...gallery]} alt={titleGuess} />
+          </div>
+        </>
       );
     }
-    const [photos] = await Promise.all([
+    const [globalPhotos, photos] = await Promise.all([
+      getAllLocalPhotos3000(),
       getLocalPhotos(slugify(p.name)),
     ]);
     const remoteHero = (p.images && p.images[0]?.url) || undefined;
-    const hero = photos[0] ?? remoteHero;
-    const gallery = (photos || []).slice(1);
+    const hero = (globalPhotos.length ? globalPhotos[Math.floor(Math.random() * globalPhotos.length)] : undefined) ?? remoteHero;
+    const gallery = globalPhotos.filter((u) => u !== hero);
 
     // If this property exists in Beds24 v2 data, extract room/roomType/unit images and names
     let roomGroups: Array<{ name: string; images: string[] }> = [];
@@ -83,32 +91,43 @@ export default async function PropertyPage({ params }: { params: { slug: string 
     } catch {}
 
     return (
-      <div className="mx-auto max-w-5xl px-6 py-12">
-        <PhotoCarousel images={[hero, ...gallery].filter(Boolean)} alt={p.name} />
-        <h1 className="mt-6 text-2xl font-semibold">{p.name}</h1>
-        <div className="mt-2 text-gray-700">Sleeps {p.maxGuests} · {p.bedrooms} bed · {p.bathrooms} bath</div>
-        <div className="mt-4">£{p.priceNight}/night</div>
-        <p className="mt-6 whitespace-pre-line text-gray-800">{p.description || ""}</p>
-
-        {roomGroups.length > 0 ? (
-          <div className="mt-10">
-            <div className="text-xl font-semibold">Rooms and units</div>
-            <div className="mt-4 grid gap-6 sm:grid-cols-2">
-              {roomGroups.map((g, idx) => (
-                <div key={idx} className="rounded-lg border border-gray-200 p-3">
-                  <div className="text-sm font-medium">{g.name}</div>
-                  <div className="mt-2 grid grid-cols-3 gap-2">
-                    {g.images.slice(0, 6).map((src, i) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img key={i} src={src} alt={`${g.name} ${i + 1}`} className="aspect-square w-full rounded object-cover" />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+      <>
+        <div className="relative h-96 w-full">
+          {hero ? (
+            <Image src={hero} alt={p.name} fill priority sizes="100vw" className="object-cover" />
+          ) : null}
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <h1 className="px-4 text-center text-3xl font-bold text-white drop-shadow-md">{p.name}</h1>
           </div>
-        ) : null}
-      </div>
+        </div>
+        <div className="mx-auto max-w-5xl px-6 py-12">
+          <PhotoCarousel images={[hero, ...gallery].filter(Boolean)} alt={p.name} />
+          <div className="mt-6 text-2xl font-semibold">{p.name}</div>
+          <div className="mt-2 text-gray-700">Sleeps {p.maxGuests} · {p.bedrooms} bed · {p.bathrooms} bath</div>
+          <div className="mt-4">£{p.priceNight}/night</div>
+          <p className="mt-6 whitespace-pre-line text-gray-800">{p.description || ""}</p>
+
+          {roomGroups.length > 0 ? (
+            <div className="mt-10">
+              <div className="text-xl font-semibold">Rooms and units</div>
+              <div className="mt-4 grid gap-6 sm:grid-cols-2">
+                {roomGroups.map((g, idx) => (
+                  <div key={idx} className="rounded-lg border border-gray-200 p-3">
+                    <div className="text-sm font-medium">{g.name}</div>
+                    <div className="mt-2 grid grid-cols-3 gap-2">
+                      {g.images.slice(0, 6).map((src, i) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img key={i} src={src} alt={`${g.name} ${i + 1}`} className="aspect-square w-full rounded object-cover" />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </>
     );
   }
   try {
@@ -117,31 +136,52 @@ export default async function PropertyPage({ params }: { params: { slug: string 
     if (!p) return notFound();
     const photoSlug = (p as any).slug || slugify(p.title);
     const localPhotos = await getLocalPhotos(photoSlug);
-    const localCover = localPhotos[0];
+    const globalPhotos = await getAllLocalPhotos3000();
     const remoteHero = (p.images && (p as any).images?.[0]?.url) || undefined;
-    const hero = localCover ?? remoteHero;
-    const gallery = (localPhotos || []).slice(1);
+    const hero = (globalPhotos.length ? globalPhotos[Math.floor(Math.random() * globalPhotos.length)] : undefined) ?? remoteHero;
+    const gallery = globalPhotos.filter((u) => u !== hero);
     return (
-      <div className="mx-auto max-w-5xl px-6 py-12">
-        <PhotoCarousel images={[hero, ...gallery].filter(Boolean)} alt={p.title} />
-        <h1 className="mt-6 text-2xl font-semibold">{p.title}</h1>
-        <div className="mt-2 text-gray-700">Sleeps {p.maxGuests} · {p.bedrooms} bed · {p.bathrooms} bath</div>
-        <div className="mt-4">£{p.priceNight}/night</div>
-        <p className="mt-6 whitespace-pre-line text-gray-800">{p.description}</p>
-      </div>
+      <>
+        <div className="relative h-96 w-full">
+          {hero ? (
+            <Image src={hero} alt={p.title} fill priority sizes="100vw" className="object-cover" />
+          ) : null}
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <h1 className="px-4 text-center text-3xl font-bold text-white drop-shadow-md">{p.title}</h1>
+          </div>
+        </div>
+        <div className="mx-auto max-w-5xl px-6 py-12">
+          <PhotoCarousel images={[hero, ...gallery].filter(Boolean)} alt={p.title} />
+          <div className="mt-6 text-2xl font-semibold">{p.title}</div>
+          <div className="mt-2 text-gray-700">Sleeps {p.maxGuests} · {p.bedrooms} bed · {p.bathrooms} bath</div>
+          <div className="mt-4">£{p.priceNight}/night</div>
+          <p className="mt-6 whitespace-pre-line text-gray-800">{p.description}</p>
+        </div>
+      </>
     );
   } catch {
     // DB unreachable: render with local photos only
     const photos = await getLocalPhotos(slug);
-    const hero = photos[0];
-    const gallery = (photos || []).slice(1);
+    const globalPhotos = await getAllLocalPhotos3000();
+    const hero = globalPhotos.length ? globalPhotos[Math.floor(Math.random() * globalPhotos.length)] : undefined;
     if (!hero) return notFound();
+    const gallery = globalPhotos.filter((u) => u !== hero);
     const titleGuess = slug.replace(/-/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
     return (
-      <div className="mx-auto max-w-5xl px-6 py-12">
-        <PhotoCarousel images={[hero, ...gallery].filter(Boolean)} alt={titleGuess} />
-        <h1 className="mt-6 text-2xl font-semibold">{titleGuess}</h1>
-      </div>
+      <>
+        <div className="relative h-96 w-full">
+          <Image src={hero} alt={titleGuess} fill priority sizes="100vw" className="object-cover" />
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <h1 className="px-4 text-center text-3xl font-bold text-white drop-shadow-md">{titleGuess}</h1>
+          </div>
+        </div>
+        <div className="mx-auto max-w-5xl px-6 py-12">
+          <PhotoCarousel images={[hero, ...gallery]} alt={titleGuess} />
+          <div className="mt-6 text-2xl font-semibold">{titleGuess}</div>
+        </div>
+      </>
     );
   }
 }
