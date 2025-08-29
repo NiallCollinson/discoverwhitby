@@ -95,7 +95,7 @@ export default async function Home() {
             <h1 className="text-3xl font-semibold text-black sm:text-4xl lg:text-5xl">Discover Whitby</h1>
             <p className="mt-3 max-w-2xl text-black/80">Get away for less, cottages and more starting at £50 a night!</p>
             <a href="/properties" className="mt-6 inline-flex rounded-md bg-white/90 px-4 py-2 text-sm font-medium text-black hover:bg-white">
-              Start your search
+              Properties
             </a>
           </div>
         </div>

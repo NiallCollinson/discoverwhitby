@@ -17,15 +17,25 @@ type PropertyLite = {
 
 export function PropertiesExplorer({ items, hasDb }: { items: PropertyLite[]; hasDb: boolean }) {
   const [query, setQuery] = useState<string>("");
-  const [guests, setGuests] = useState<string>("");
+  const [guests, setGuests] = useState<string>("2");
   const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
+  const [dateLabel, setDateLabel] = useState<string>("");
 
   useEffect(() => {
     try {
       const url = new URL(window.location.href);
       const guestsParam = url.searchParams.get("guests") ?? "";
-      setGuests(guestsParam);
+      setGuests(guestsParam || "2");
     } catch {}
+  }, []);
+
+  useEffect(() => {
+    // Compute sample dates on client to avoid hydration mismatches
+    const start = new Date();
+    const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 2);
+    const fmt = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short" });
+    const label = `${fmt.format(start)} – ${fmt.format(end)} ${end.getFullYear()}`;
+    setDateLabel(label);
   }, []);
 
   useEffect(() => {
@@ -49,15 +59,14 @@ export function PropertiesExplorer({ items, hasDb }: { items: PropertyLite[]; ha
 
   return (
     <div id="search" className="mx-auto max-w-7xl bg-white px-6 py-12">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-3">
         <div className="rounded-lg border border-gray-200 bg-white p-4 relative">
-          <div className="text-sm font-medium">Dates</div>
           <button
             type="button"
-            className="mt-2 w-full rounded-md border px-3 py-2 text-left"
+            className="w-full rounded-md border px-3 py-2 text-left"
             onClick={() => setCalendarOpen((v) => !v)}
           >
-            Add dates
+            <span suppressHydrationWarning>{dateLabel || "Select dates"}</span>
           </button>
           {calendarOpen ? (
             <div className="absolute left-0 right-0 mt-2">
@@ -69,14 +78,24 @@ export function PropertiesExplorer({ items, hasDb }: { items: PropertyLite[]; ha
           ) : null}
         </div>
         <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <div className="text-sm font-medium">Guests</div>
           <input
-            className="mt-2 w-full rounded-md border px-3 py-2"
+            className="w-full rounded-md border px-3 py-2"
             placeholder="2 guests"
             inputMode="numeric"
             value={guests}
             onChange={(e) => setGuests(e.target.value.replace(/[^0-9]/g, ""))}
           />
+        </div>
+        <div className="rounded-lg border border-gray-200 bg-white p-4 flex items-end">
+          <button
+            type="button"
+            className="w-full rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-900"
+            onClick={() => {
+              setCalendarOpen(false);
+            }}
+          >
+            Search
+          </button>
         </div>
       </div>
 

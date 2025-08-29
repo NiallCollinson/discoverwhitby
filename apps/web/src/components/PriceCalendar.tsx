@@ -7,22 +7,41 @@ import "react-day-picker/dist/style.css";
 type DayInfo = { available: boolean; price: number | null; minStay: number | null };
 type MonthData = Record<string, DayInfo>; // ISO -> info
 
+export type CalendarProps = {
+  value?: Date | null;
+  onChange?: (d: Date) => void;
+  minDate?: Date;
+  maxDate?: Date;
+  dailyMeta?: Record<string, { price: number | null; available: boolean }>;
+  adults?: number;
+  children?: number;
+  numberOfMonths?: number;
+  mock?: boolean;
+  onClose?: () => void;
+};
+
 export default function PriceCalendar({
+  value = null,
+  onChange,
+  minDate,
+  maxDate,
+  dailyMeta,
   adults = Number(process.env.NEXT_PUBLIC_DEFAULT_ADULTS ?? 2),
   children = Number(process.env.NEXT_PUBLIC_DEFAULT_CHILDREN ?? 0),
   numberOfMonths = 2,
   mock = false,
   onClose,
-}: { adults?: number; children?: number; numberOfMonths?: number; mock?: boolean; onClose?: () => void }) {
+}: CalendarProps) {
   const [visible, setVisible] = useState<{ year: number; month: number }>(() => {
     const now = new Date();
-    return { year: now.getUTCFullYear(), month: now.getUTCMonth() + 1 };
+    return { year: now.getFullYear(), month: now.getMonth() + 1 };
   });
   const [data, setData] = useState<Record<string, MonthData>>({});
   const [range, setRange] = useState<DateRange | undefined>();
   const today = useMemo(() => new Date(), []);
-  const fromMonth = useMemo(() => new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1)), [today]);
-  const toMonth = useMemo(() => new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 12, 1)), [today]);
+  const startOfToday = useMemo(() => new Date(today.getFullYear(), today.getMonth(), today.getDate()), [today]);
+  const fromMonth = useMemo(() => new Date(today.getFullYear(), today.getMonth(), 1), [today]);
+  const toMonth = useMemo(() => new Date(today.getFullYear(), today.getMonth() + 12, 1), [today]);
 
   useEffect(() => {
     const key = `${visible.year}-${visible.month}-${adults}-${children}`;
@@ -47,7 +66,7 @@ export default function PriceCalendar({
 
   const dayContent = (day: Date) => {
     const iso = day.toISOString().slice(0, 10);
-    const info = data[dataKey]?.[iso];
+    const info = dailyMeta?.[iso] ?? data[dataKey]?.[iso];
     const priceStr = info?.price != null ? `£${Math.round(Number(info.price))}` : "";
     return (
       <div className="flex flex-col items-center">
@@ -59,8 +78,11 @@ export default function PriceCalendar({
 
   const disabled = (day: Date) => {
     const iso = day.toISOString().slice(0, 10);
-    const info = data[dataKey]?.[iso];
-    return info ? !info.available : false;
+    const info = dailyMeta?.[iso] ?? data[dataKey]?.[iso];
+    const isPast = day < startOfToday; // allow selecting today
+    // In mock mode, do not disable based on availability to avoid random blocked dates
+    if (mock) return isPast;
+    return isPast || (info ? info.available === false : false);
   };
 
   useEffect(() => {
@@ -88,14 +110,14 @@ export default function PriceCalendar({
         mode="range"
         selected={range}
         onSelect={setRange}
-        month={new Date(Date.UTC(visible.year, visible.month - 1, 1))}
-        onMonthChange={(d) => setVisible({ year: d.getUTCFullYear(), month: d.getUTCMonth() + 1 })}
+        month={new Date(visible.year, visible.month - 1, 1)}
+        onMonthChange={(d) => setVisible({ year: d.getFullYear(), month: d.getMonth() + 1 })}
         numberOfMonths={numberOfMonths}
         fixedWeeks
         showOutsideDays
         fromMonth={fromMonth}
         toMonth={toMonth}
-        disabled={[disabled, { before: new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())) }]}
+        disabled={[disabled, { before: startOfToday }]}
         components={{ DayContent: (p) => dayContent(p.date) }}
         className="rdp"
       />
