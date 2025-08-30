@@ -148,23 +148,19 @@ function asArr<T = any>(v: any): T[] {
 }
 
 export async function fetchBeds24Properties(): Promise<Beds24V2Property[]> {
-  const baseUrl = getEnvOrUndefined("BEDS24_BASE_URL") ?? "https://beds24.com/api/v2";
-  const account = getEnvOrUndefined("BEDS24_ACCOUNT");
-  const token = getEnvOrUndefined("BEDS24_ACCESS_TOKEN");
-  if (!token || !account) return [];
+  const baseUrl = getEnvOrUndefined("BEDS24_V2_BASE_URL")
+    ?? getEnvOrUndefined("BEDS24_BASE_URL")
+    ?? "https://beds24.com/api/v2";
+  const token = getEnvOrUndefined("BEDS24_ACCESS_TOKEN")
+    ?? getEnvOrUndefined("BEDS24_API_TOKEN");
+  if (!token) return [];
 
   const url = new URL(baseUrl.replace(/\/$/, "") + "/properties");
-  url.searchParams.set("accountId", account);
-  url.searchParams.set("account", account);
-  url.searchParams.set("includeAllRooms", "true");
+  url.searchParams.set("limit", "200");
   url.searchParams.set("include", "images,tags,address,location,rooms,roomTypes,roomtypes,units");
 
   try {
-    const res = await fetch(url.toString(), {
-      method: "GET",
-      headers: { Accept: "application/json", token },
-      // No body on GET
-    });
+    const res = await fetch(url.toString(), { method: "GET", headers: { accept: "application/json", token } });
     if (!res.ok) return [];
     const data = await res.json();
     const list: any[] = Array.isArray(data)

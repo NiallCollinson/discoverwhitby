@@ -3,7 +3,11 @@ import Image from "next/image";
 import { createBeds24Adapter, fetchBeds24Properties } from "@discoverwhitby/integrations";
 import { slugify } from "@/src/lib/slugify";
 import { getLocalPhotos, getLocalCover, getAllLocalPhotos3000 } from "@/src/server/photos/getLocalPhotos";
+import { getProperties as bedsGetProperties, getProperty as bedsGetProperty, getInventory as bedsGetInventory } from "@/src/server/beds24Json";
 import PhotoCarousel from "@/app/components/PhotoCarousel";
+import AvailabilityWidget from "@/src/components/AvailabilityWidget";
+import PropertyDetailsWidget from "@/src/components/PropertyDetailsWidget";
+import PropertyAvailabilityCalendar from "@/src/components/PropertyAvailabilityCalendar";
 
 export default async function PropertyPage({ params }: { params: { slug: string } }) {
   const FILLER = "/photos/5%20Starfish/Full%20Res/5Starfish_FullRes-1.jpg";
@@ -51,6 +55,20 @@ export default async function PropertyPage({ params }: { params: { slug: string 
     const hero = FILLER;
     const gallery = [FILLER, FILLER, FILLER];
 
+    // Try to enrich details via Beds24 JSON (non-fatal if fails)
+    try {
+      const all = await bedsGetProperties();
+      const found = all.find((it: any) => String(it.id) === String(p.id) || slugify(String(it.name ?? "")) === slugify(p.name));
+      if (found?.id) {
+        const details = await bedsGetProperty(found.id);
+        const inventory = await bedsGetInventory(found.id);
+        if (details?.description && !p.description) p.description = String(details.description);
+        if (typeof details?.bedrooms === "number") p.bedrooms = Number(details.bedrooms);
+        if (typeof details?.maxGuests === "number") p.maxGuests = Number(details.maxGuests);
+        // inventory can be wired to availability widgets later
+      }
+    } catch {}
+
     // If this property exists in Beds24 v2 data, extract room/roomType/unit images and names
     let roomGroups: Array<{ name: string; images: string[] }> = [];
     try {
@@ -91,7 +109,30 @@ export default async function PropertyPage({ params }: { params: { slug: string 
           <div className="mt-6 text-2xl font-semibold">{p.name}</div>
           <div className="mt-2 text-gray-700">Sleeps {p.maxGuests} · {p.bedrooms} bed · {p.bathrooms} bath</div>
           <div className="mt-4">£{p.priceNight}/night</div>
-          <p className="mt-6 whitespace-pre-line text-gray-800">{p.description || ""}</p>
+
+          {/* Availability calendar */}
+          <PropertyAvailabilityCalendar propertyId={slug === "bluegrass-cottage" ? "215637" : String(p.id ?? "132982")} />
+
+          
+
+          {slug === "bluegrass-cottage" ? (
+            <div className="mt-8 rounded-lg border border-gray-200 bg-white p-6">
+              <div className="mt-2 text-sm text-gray-800">
+                Bluegrass Cottage is a delightful, centrally located one bedroom cottage in Whitby with its
+                own private parking space. It has a separate bedroom, living and dining space as well as a fully
+                equipped kitchen. Located on Hunter Street.
+              </div>
+              <div className="mt-4 grid gap-2 text-sm text-gray-700 sm:grid-cols-2">
+                <div>Sleeps: 2</div>
+                <div>Bedrooms: 1 (1 x Double)</div>
+                <div>Bathrooms: 1 (Shower)</div>
+                <div>Dogs: Allowed (fee)</div>
+                <div>Parking: Private space</div>
+                
+              </div>
+              
+            </div>
+          ) : null}
 
           {roomGroups.length > 0 ? (
             <div className="mt-10">
@@ -133,7 +174,11 @@ export default async function PropertyPage({ params }: { params: { slug: string 
           <div className="mt-6 text-2xl font-semibold">{p.title}</div>
           <div className="mt-2 text-gray-700">Sleeps {p.maxGuests} · {p.bedrooms} bed · {p.bathrooms} bath</div>
           <div className="mt-4">£{p.priceNight}/night</div>
-          <p className="mt-6 whitespace-pre-line text-gray-800">{p.description}</p>
+
+          {/* Availability calendar */}
+          <PropertyAvailabilityCalendar propertyId={slug === "bluegrass-cottage" ? "215637" : String(p.id ?? "132982")} />
+
+          
         </div>
       </>
     );
