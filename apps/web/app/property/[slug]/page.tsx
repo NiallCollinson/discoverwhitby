@@ -6,6 +6,7 @@ import { getLocalPhotos, getLocalCover, getAllLocalPhotos3000 } from "@/src/serv
 import PhotoCarousel from "@/app/components/PhotoCarousel";
 
 export default async function PropertyPage({ params }: { params: { slug: string } }) {
+  const FILLER = "/photos/5%20Starfish/Full%20Res/5Starfish_FullRes-1.jpg";
   const slug = params.slug;
   const hasDb = Boolean(process.env.DATABASE_URL);
   if (!hasDb) {
@@ -33,20 +34,13 @@ export default async function PropertyPage({ params }: { params: { slug: string 
       }
     }
     if (!p) {
-      // Last-resort: render page with local photos only (from any 3000px folder)
-      const localPhotos = await getAllLocalPhotos3000();
-      const hero = localPhotos.length ? localPhotos[Math.floor(Math.random() * localPhotos.length)] : undefined;
-      const gallery = localPhotos.filter((u) => u !== hero);
-      if (!hero) return notFound();
+      const hero = FILLER;
+      const gallery = [FILLER, FILLER, FILLER];
       const titleGuess = slug.replace(/-/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
       return (
         <>
           <div className="relative h-96 w-full">
             <Image src={hero} alt={titleGuess} fill priority sizes="100vw" className="object-cover" />
-            <div className="absolute inset-0 bg-black/40" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <h1 className="px-4 text-center text-3xl font-bold text-white drop-shadow-md">{titleGuess}</h1>
-            </div>
           </div>
           <div className="mx-auto max-w-5xl px-6 py-12">
             <PhotoCarousel images={[hero, ...gallery]} alt={titleGuess} />
@@ -54,13 +48,8 @@ export default async function PropertyPage({ params }: { params: { slug: string 
         </>
       );
     }
-    const [globalPhotos, photos] = await Promise.all([
-      getAllLocalPhotos3000(),
-      getLocalPhotos(slugify(p.name)),
-    ]);
-    const remoteHero = (p.images && p.images[0]?.url) || undefined;
-    const hero = (globalPhotos.length ? globalPhotos[Math.floor(Math.random() * globalPhotos.length)] : undefined) ?? remoteHero;
-    const gallery = globalPhotos.filter((u) => u !== hero);
+    const hero = FILLER;
+    const gallery = [FILLER, FILLER, FILLER];
 
     // If this property exists in Beds24 v2 data, extract room/roomType/unit images and names
     let roomGroups: Array<{ name: string; images: string[] }> = [];
@@ -96,10 +85,6 @@ export default async function PropertyPage({ params }: { params: { slug: string 
           {hero ? (
             <Image src={hero} alt={p.name} fill priority sizes="100vw" className="object-cover" />
           ) : null}
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <h1 className="px-4 text-center text-3xl font-bold text-white drop-shadow-md">{p.name}</h1>
-          </div>
         </div>
         <div className="mx-auto max-w-5xl px-6 py-12">
           <PhotoCarousel images={[hero, ...gallery].filter(Boolean)} alt={p.name} />
@@ -134,22 +119,14 @@ export default async function PropertyPage({ params }: { params: { slug: string 
     const { prisma } = await import("@discoverwhitby/db");
     const p = await prisma.property.findUnique({ where: { slug }, include: { images: true, amenities: { include: { amenity: true } } } });
     if (!p) return notFound();
-    const photoSlug = (p as any).slug || slugify(p.title);
-    const localPhotos = await getLocalPhotos(photoSlug);
-    const globalPhotos = await getAllLocalPhotos3000();
-    const remoteHero = (p.images && (p as any).images?.[0]?.url) || undefined;
-    const hero = (globalPhotos.length ? globalPhotos[Math.floor(Math.random() * globalPhotos.length)] : undefined) ?? remoteHero;
-    const gallery = globalPhotos.filter((u) => u !== hero);
+    const hero = FILLER;
+    const gallery = [FILLER, FILLER, FILLER];
     return (
       <>
         <div className="relative h-96 w-full">
           {hero ? (
             <Image src={hero} alt={p.title} fill priority sizes="100vw" className="object-cover" />
           ) : null}
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <h1 className="px-4 text-center text-3xl font-bold text-white drop-shadow-md">{p.title}</h1>
-          </div>
         </div>
         <div className="mx-auto max-w-5xl px-6 py-12">
           <PhotoCarousel images={[hero, ...gallery].filter(Boolean)} alt={p.title} />
@@ -162,20 +139,13 @@ export default async function PropertyPage({ params }: { params: { slug: string 
     );
   } catch {
     // DB unreachable: render with local photos only
-    const photos = await getLocalPhotos(slug);
-    const globalPhotos = await getAllLocalPhotos3000();
-    const hero = globalPhotos.length ? globalPhotos[Math.floor(Math.random() * globalPhotos.length)] : undefined;
-    if (!hero) return notFound();
-    const gallery = globalPhotos.filter((u) => u !== hero);
+    const hero = FILLER;
+    const gallery = [FILLER, FILLER, FILLER];
     const titleGuess = slug.replace(/-/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
     return (
       <>
         <div className="relative h-96 w-full">
           <Image src={hero} alt={titleGuess} fill priority sizes="100vw" className="object-cover" />
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <h1 className="px-4 text-center text-3xl font-bold text-white drop-shadow-md">{titleGuess}</h1>
-          </div>
         </div>
         <div className="mx-auto max-w-5xl px-6 py-12">
           <PhotoCarousel images={[hero, ...gallery]} alt={titleGuess} />
