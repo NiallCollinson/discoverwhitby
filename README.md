@@ -1,4 +1,4 @@
-# Whitby Holiday Rentals
+
 
 This monorepo contains the web app, worker, and shared packages.
 
