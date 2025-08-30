@@ -1,0 +1,28 @@
+name: trufflehog
+on:
+  push:
+  pull_request:
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0       # scan entire history (important)
+      - name: TruffleHog scan
+        uses: trufflesecurity/trufflehog-actions-scan@v0.13.0
+        with:
+          # Include verified & unknown results; output SARIF for code scanning tab
+          scanArguments: >
+            --results=verified,unknown
+            --format=sarif
+            --no-update
+      - name: Upload SARIF to code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trufflehog-results.sarif
+
+

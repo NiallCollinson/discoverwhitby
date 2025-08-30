@@ -49,3 +49,9 @@ apps/web/public/photos/*
 apps/web/public/photos/*/**
 !apps/web/public/photos/manifest.json
 node_modules
+
+# Key/cert files
+*.pem
+*.key
+*.p12
+*.pfx

@@ -1,0 +1,32 @@
+# Minimal config to reduce false positives while staying strict on real keys.
+# Add project-specific allowlists (e.g., localhost URLs) as needed.
+title = "gitleaks config"
+
+[extend]
+# You can extend from the official rules if desired:
+# useDefault = true
+
+[rules]
+# Example: keep NEXTAUTH_SECRET / JWT strict (no allowlist here)
+
+[allowlist]
+# Common benign patterns to avoid noise; tune for your codebase.
+paths = [
+  '''^LICENSE''',
+  '''^README\.md$''',
+  '''^.*\.md$''',
+  '''^.*\.svg$''',
+  '''^.*\.png$''',
+  '''^.*\.jpg$''',
+  '''^.*\.jpeg$''',
+  '''^.*\.gif$''',
+]
+commits = []
+regexes = [
+  # Localhost URLs
+  '''https?:\/\/(localhost|127\.0\.0\.1)(:\\d+)?\/?\S*''',
+  # Clearly fake keys/tokens used in docs/tests
+  '''(FAKE|DUMMY|PLACEHOLDER)[-_]?(KEY|TOKEN|SECRET)''',
+]
+
+
