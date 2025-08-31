@@ -129,6 +129,8 @@ export default async function PropertyPage({ params }: { params: { slug: string 
                 <div>Dogs: Allowed (fee)</div>
                 <div>Parking: Private space</div>
                 <div className="sm:col-span-2 text-xs text-gray-600">Parking in North Yorkshire is free to Blue Badge holders.</div>
+                <div className="sm:col-span-2 text-xs text-gray-600">Scratch cards: enables parking all day with a correctly validated scratch card on display in their vehicle until 10am the following day.</div>
+                <div className="sm:col-span-2 text-xs text-gray-600">Whitby Laundry sells a 2 day parking permit and guide.</div>
                 
               </div>
               
