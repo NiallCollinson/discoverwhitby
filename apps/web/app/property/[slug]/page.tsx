@@ -128,6 +128,7 @@ export default async function PropertyPage({ params }: { params: { slug: string 
                 <div>Bathrooms: 1 (Shower)</div>
                 <div>Dogs: Allowed (fee)</div>
                 <div>Parking: Private space</div>
+                <div className="sm:col-span-2 text-xs text-gray-600">Parking in North Yorkshire is free to Blue Badge holders.</div>
                 
               </div>
               
