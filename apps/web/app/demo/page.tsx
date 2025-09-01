@@ -1,8 +1,173 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
+
+interface Beds24Property {
+  id: string;
+  name: string;
+  bedrooms: number;
+  maxGuests: number;
+  priceNight: number;
+  images?: Array<{ url: string }>;
+}
+
+interface BookingQuote {
+  total: number;
+  nights: number;
+  serviceFee: number;
+  basePrice: number;
+}
 
 export default function DemoPage() {
+  const [properties, setProperties] = useState<Beds24Property[]>([]);
+  const [selectedProperty, setSelectedProperty] = useState<Beds24Property | null>(null);
+  const [checkIn, setCheckIn] = useState<string>("");
+  const [checkOut, setCheckOut] = useState<string>("");
+  const [guests, setGuests] = useState<number>(2);
+  const [quote, setQuote] = useState<BookingQuote | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [quoteLoading, setQuoteLoading] = useState<boolean>(false);
+
+  // Fetch Beds24 properties on component mount
+  useEffect(() => {
+    const fetchProperties = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch('/api/beds24/properties');
+        if (response.ok) {
+          const data = await response.json();
+          setProperties(data);
+          if (data.length > 0) {
+            setSelectedProperty(data[0]);
+          }
+        } else {
+          // Fallback to demo properties if API fails
+          const demoProperties: Beds24Property[] = [
+            { id: "demo-1", name: "Harbour View Cottage", bedrooms: 2, maxGuests: 4, priceNight: 120 },
+            { id: "demo-2", name: "Abbey Loft Apartment", bedrooms: 1, maxGuests: 2, priceNight: 90 },
+            { id: "demo-3", name: "Sea Breeze House", bedrooms: 3, maxGuests: 6, priceNight: 180 },
+            { id: "demo-4", name: "Whitby Lighthouse Suite", bedrooms: 2, maxGuests: 4, priceNight: 150 },
+          ];
+          setProperties(demoProperties);
+          setSelectedProperty(demoProperties[0]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch properties:', error);
+        // Fallback to demo properties
+        const demoProperties: Beds24Property[] = [
+          { id: "demo-1", name: "Harbour View Cottage", bedrooms: 2, maxGuests: 4, priceNight: 120 },
+          { id: "demo-2", name: "Abbey Loft Apartment", bedrooms: 1, maxGuests: 2, priceNight: 90 },
+          { id: "demo-3", name: "Sea Breeze House", bedrooms: 3, maxGuests: 6, priceNight: 180 },
+          { id: "demo-4", name: "Whitby Lighthouse Suite", bedrooms: 2, maxGuests: 4, priceNight: 150 },
+        ];
+        setProperties(demoProperties);
+        setSelectedProperty(demoProperties[0]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, []);
+
+  // Calculate quote when dates or property changes
+  useEffect(() => {
+    const calculateQuote = async () => {
+      if (!selectedProperty || !checkIn || !checkOut) {
+        setQuote(null);
+        return;
+      }
+
+      setQuoteLoading(true);
+      try {
+        const response = await fetch('/api/beds24/quote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            propertyId: selectedProperty.id,
+            checkIn,
+            checkOut,
+            guests
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const nights = Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24));
+          const basePrice = nights * selectedProperty.priceNight;
+          const serviceFee = Math.round(basePrice * 0.05); // 5% service fee
+          
+          setQuote({
+            total: basePrice + serviceFee,
+            nights,
+            serviceFee,
+            basePrice
+          });
+        } else {
+          // Fallback calculation
+          const nights = Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24));
+          const basePrice = nights * selectedProperty.priceNight;
+          const serviceFee = Math.round(basePrice * 0.05);
+          
+          setQuote({
+            total: basePrice + serviceFee,
+            nights,
+            serviceFee,
+            basePrice
+          });
+        }
+      } catch (error) {
+        console.error('Failed to calculate quote:', error);
+        // Fallback calculation
+        const nights = Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24));
+        const basePrice = nights * selectedProperty.priceNight;
+        const serviceFee = Math.round(basePrice * 0.05);
+        
+        setQuote({
+          total: basePrice + serviceFee,
+          nights,
+          serviceFee,
+          basePrice
+        });
+      } finally {
+        setQuoteLoading(false);
+      }
+    };
+
+    calculateQuote();
+  }, [selectedProperty, checkIn, checkOut, guests]);
+
+  const handleBooking = async () => {
+    if (!selectedProperty || !checkIn || !checkOut || !quote) return;
+
+    try {
+      const response = await fetch('/api/beds24/booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          propertyId: selectedProperty.id,
+          checkIn,
+          checkOut,
+          guests,
+          guest: {
+            name: "Demo User",
+            email: "demo@example.com"
+          }
+        })
+      });
+
+      if (response.ok) {
+        alert('Booking submitted successfully! (This is a demo)');
+      } else {
+        alert('Booking failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      alert('Booking failed. Please try again.');
+    }
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       {/* Hero Section */}
@@ -73,37 +238,54 @@ export default function DemoPage() {
                     <div className="space-y-6">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-3">Select Property</label>
-                        <select className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-200 bg-white text-gray-900">
-                          <option>Harbour View Cottage</option>
-                          <option>Abbey Loft Apartment</option>
-                          <option>Sea Breeze House</option>
-                          <option>Whitby Lighthouse Suite</option>
-                        </select>
+                        {loading ? (
+                          <div className="w-full px-4 py-4 border border-gray-300 rounded-xl bg-gray-50 flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900"></div>
+                            <span className="ml-2 text-gray-600">Loading properties...</span>
+                          </div>
+                        ) : (
+                          <select 
+                            className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-200 bg-white text-gray-900"
+                            value={selectedProperty?.id || ""}
+                            onChange={(e) => {
+                              const property = properties.find(p => p.id === e.target.value);
+                              setSelectedProperty(property || null);
+                            }}
+                          >
+                            {properties.map((property) => (
+                              <option key={property.id} value={property.id}>
+                                {property.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
                       </div>
                       
-                      <div className="bg-gray-50 rounded-xl p-6">
-                        <h5 className="font-semibold text-gray-900 mb-3">Property Details</h5>
-                        <div className="space-y-2 text-sm text-gray-600">
-                          <div className="flex items-center">
-                            <svg className="w-4 h-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-6a1 1 0 00-1-1H9a1 1 0 00-1 1v6a1 1 0 01-1 1H4a1 1 0 110-2V4z" clipRule="evenodd" />
-                            </svg>
-                            2 bedrooms
-                          </div>
-                          <div className="flex items-center">
-                            <svg className="w-4 h-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                            </svg>
-                            Sleeps 4
-                          </div>
-                          <div className="flex items-center">
-                            <svg className="w-4 h-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
-                            </svg>
-                            £120/night
+                      {selectedProperty && (
+                        <div className="bg-gray-50 rounded-xl p-6">
+                          <h5 className="font-semibold text-gray-900 mb-3">Property Details</h5>
+                          <div className="space-y-2 text-sm text-gray-600">
+                            <div className="flex items-center">
+                              <svg className="w-4 h-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-6a1 1 0 00-1-1H9a1 1 0 00-1 1v6a1 1 0 01-1 1H4a1 1 0 110-2V4z" clipRule="evenodd" />
+                              </svg>
+                              {selectedProperty.bedrooms} bedroom{selectedProperty.bedrooms !== 1 ? 's' : ''}
+                            </div>
+                            <div className="flex items-center">
+                              <svg className="w-4 h-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                              </svg>
+                              Sleeps {selectedProperty.maxGuests}
+                            </div>
+                            <div className="flex items-center">
+                              <svg className="w-4 h-4 mr-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                              </svg>
+                              £{selectedProperty.priceNight}/night
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                     
                     {/* Booking Form */}
@@ -115,6 +297,8 @@ export default function DemoPage() {
                             type="date" 
                             className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-200 bg-white text-gray-900"
                             min={new Date().toISOString().split('T')[0]}
+                            value={checkIn}
+                            onChange={(e) => setCheckIn(e.target.value)}
                           />
                         </div>
                         <div>
@@ -123,41 +307,63 @@ export default function DemoPage() {
                             type="date" 
                             className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-200 bg-white text-gray-900"
                             min={new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0]}
+                            value={checkOut}
+                            onChange={(e) => setCheckOut(e.target.value)}
                           />
                         </div>
                       </div>
                       
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-3">Guests</label>
-                        <select className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-200 bg-white text-gray-900">
-                          <option value="1">1 Guest</option>
-                          <option value="2" selected>2 Guests</option>
-                          <option value="3">3 Guests</option>
-                          <option value="4">4 Guests</option>
-                          <option value="5">5 Guests</option>
-                          <option value="6">6 Guests</option>
+                        <select 
+                          className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-200 bg-white text-gray-900"
+                          value={guests}
+                          onChange={(e) => setGuests(parseInt(e.target.value))}
+                        >
+                          {Array.from({ length: 6 }, (_, i) => i + 1).map((num) => (
+                            <option key={num} value={num}>
+                              {num} Guest{num !== 1 ? 's' : ''}
+                            </option>
+                          ))}
                         </select>
                       </div>
                       
                       <div className="bg-gray-50 rounded-xl p-6">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm text-gray-600">3 nights</span>
-                          <span className="text-sm text-gray-600">£360</span>
-                        </div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm text-gray-600">Service fee</span>
-                          <span className="text-sm text-gray-600">£18</span>
-                        </div>
-                        <div className="border-t border-gray-200 pt-2">
-                          <div className="flex justify-between items-center">
-                            <span className="font-semibold text-gray-900">Total</span>
-                            <span className="font-semibold text-gray-900">£378</span>
+                        {quoteLoading ? (
+                          <div className="flex items-center justify-center py-4">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900"></div>
+                            <span className="ml-2 text-gray-600">Calculating...</span>
                           </div>
-                        </div>
+                        ) : quote ? (
+                          <>
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm text-gray-600">{quote.nights} night{quote.nights !== 1 ? 's' : ''}</span>
+                              <span className="text-sm text-gray-600">£{quote.basePrice}</span>
+                            </div>
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm text-gray-600">Service fee</span>
+                              <span className="text-sm text-gray-600">£{quote.serviceFee}</span>
+                            </div>
+                            <div className="border-t border-gray-200 pt-2">
+                              <div className="flex justify-between items-center">
+                                <span className="font-semibold text-gray-900">Total</span>
+                                <span className="font-semibold text-gray-900">£{quote.total}</span>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="text-center py-4 text-gray-500">
+                            <p className="text-sm">Select dates to see pricing</p>
+                          </div>
+                        )}
                       </div>
                       
-                      <button className="w-full bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl">
-                        Book Now
+                      <button 
+                        className="w-full bg-black text-white py-4 px-6 rounded-xl font-medium hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={handleBooking}
+                        disabled={!quote || !selectedProperty || !checkIn || !checkOut}
+                      >
+                        {quoteLoading ? 'Calculating...' : 'Book Now'}
                       </button>
                     </div>
                   </div>
