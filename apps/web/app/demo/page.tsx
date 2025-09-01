@@ -76,17 +76,24 @@ export default function DemoPage() {
                     minHeight: '2000px'
                   }}
                   title="Beds24 Booking Widget"
-                >
-                  <p>
+                  frameBorder="0"
+                  allowFullScreen
+                />
+                
+                {/* Fallback message in case iframe fails to load */}
+                <div className="mt-4 text-center">
+                  <p className="text-sm text-gray-500">
+                    If the booking widget doesn't load, you can{" "}
                     <a 
                       href="https://beds24.com/booking2.php?ownerid=75780&amp;referer=iframe" 
-                      title="Book Now"
-                      className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-indigo-600 hover:text-indigo-700 underline"
                     >
-                      Book Now on Beds24
+                      book directly on Beds24
                     </a>
                   </p>
-                </iframe>
+                </div>
               </div>
               
               {/* Custom Footer for the Widget */}
