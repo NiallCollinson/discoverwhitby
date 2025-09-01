@@ -171,7 +171,84 @@ export default function DemoPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <>
+      {/* Custom CSS for Apple-style Beds24 widget */}
+      <style jsx global>{`
+        /* Apple-style enhancements for Beds24 widget */
+        iframe[title="Apple-Style Beds24 Booking Widget"] {
+          border-radius: 16px !important;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+        }
+        
+        /* Target Beds24 widget elements when loaded */
+        .beds24-widget {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        }
+        
+        .beds24-widget input,
+        .beds24-widget select,
+        .beds24-widget textarea {
+          border-radius: 12px !important;
+          border: 2px solid #e5e7eb !important;
+          padding: 12px 16px !important;
+          font-size: 16px !important;
+          transition: all 0.2s ease !important;
+          background-color: #ffffff !important;
+          color: #111827 !important;
+        }
+        
+        .beds24-widget input:focus,
+        .beds24-widget select:focus,
+        .beds24-widget textarea:focus {
+          border-color: #000000 !important;
+          box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1) !important;
+          outline: none !important;
+        }
+        
+        .beds24-widget button,
+        .beds24-widget input[type="submit"] {
+          border-radius: 25px !important;
+          padding: 16px 32px !important;
+          font-weight: 600 !important;
+          letter-spacing: -0.025em !important;
+          transition: all 0.2s ease !important;
+          background-color: #000000 !important;
+          color: #ffffff !important;
+          border: none !important;
+          cursor: pointer !important;
+        }
+        
+        .beds24-widget button:hover,
+        .beds24-widget input[type="submit"]:hover {
+          transform: translateY(-2px) !important;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
+          background-color: #1f2937 !important;
+        }
+        
+        .beds24-widget label {
+          font-weight: 500 !important;
+          color: #374151 !important;
+          margin-bottom: 8px !important;
+          font-size: 14px !important;
+        }
+        
+        .beds24-widget .widget-title {
+          font-size: 24px !important;
+          font-weight: 600 !important;
+          color: #111827 !important;
+          margin-bottom: 16px !important;
+          text-align: center !important;
+        }
+        
+        .beds24-widget .booking-form {
+          background-color: #ffffff !important;
+          border-radius: 20px !important;
+          padding: 24px !important;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+        }
+      `}</style>
+      
+      <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       {/* Hero Section */}
       <section className="relative bg-white">
         <div className="mx-auto max-w-7xl px-6 py-20">
@@ -393,10 +470,10 @@ export default function DemoPage() {
                     <p className="text-sm text-gray-600">Select dates, choose your property, and book instantly</p>
                   </div>
                   
-                  {/* Beds24 Widget Container - Using iframe for guaranteed functionality */}
+                  {/* Beds24 Widget Container - Using iframe with comprehensive Apple-style parameters */}
                   <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-200 p-6">
                     <iframe 
-                      src="https://beds24.com/booking2.php?ownerid=75780&advancedays=0&referer=iframe&theme=apple&color=000000&backgroundColor=ffffff&borderColor=e5e7eb&buttonBackgroundColor=000000&buttonColor=ffffff&fontSize=16&dateSelection=2&defaultNumAdult=2&defaultNumChild=0&peopleSelection=2&showLabels=1&dateFormat=dd/mm/yy&weekFirstDay=1" 
+                      src="https://beds24.com/booking2.php?ownerid=75780&propid=75780&referer=apple-widget-demo&alignment=center&backgroundColor=ffffff&borderColor=e5e7eb&boxShadow=true&buttonBackgroundColor=000000&buttonColor=ffffff&buttonTitle=Book Now&color=111827&dateFormat=dd/mm/yy&dateSelection=2&defaultNumAdult=2&defaultNumChild=0&defaultNightsAdvance=0&fontSize=16px&formAction=https://beds24.com/booking.php&formTarget=_blank&maxNumNight=30&minNumNight=1&noExternalFonts=false&peopleSelection=2&showLabels=true&weekFirstDay=1&widgetLang=en&widgetTitle=Book Your Stay&widgetType=BookingBox&width=100%" 
                       width="100%" 
                       height="800" 
                       className="w-full border-0 rounded-xl"
@@ -559,6 +636,7 @@ export default function DemoPage() {
           </div>
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
