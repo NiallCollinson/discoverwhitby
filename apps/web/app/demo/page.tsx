@@ -19,9 +19,9 @@ export default function DemoPage() {
             <div className="mt-12 flex justify-center gap-6">
               <a
                 href="/properties"
-                className="inline-flex items-center rounded-full bg-gray-900 px-8 py-4 text-base font-medium text-white hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="inline-flex items-center rounded-full bg-black px-8 py-4 text-base font-medium text-white hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                View All Properties
+                Book
               </a>
               <a
                 href="/"
@@ -189,9 +189,9 @@ export default function DemoPage() {
           <div className="flex justify-center gap-6">
             <a
               href="/properties"
-              className="inline-flex items-center rounded-full bg-white px-10 py-5 text-lg font-medium text-gray-900 hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="inline-flex items-center rounded-full bg-black px-10 py-5 text-lg font-medium text-white hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl"
             >
-              Browse All Properties
+              Book
             </a>
             <a
               href="/"
