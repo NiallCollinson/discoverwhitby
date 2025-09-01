@@ -473,7 +473,7 @@ export default function DemoPage() {
                   {/* Beds24 Widget Container - Using iframe with comprehensive Apple-style parameters */}
                   <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-200 p-6">
                     <iframe 
-                      src="https://beds24.com/booking2.php?ownerid=75780&propid=75780&referer=apple-widget-demo&alignment=center&backgroundColor=ffffff&borderColor=e5e7eb&boxShadow=true&buttonBackgroundColor=000000&buttonColor=ffffff&buttonTitle=Book Now&color=111827&dateFormat=dd/mm/yy&dateSelection=2&defaultNumAdult=2&defaultNumChild=0&defaultNightsAdvance=0&fontSize=16px&formAction=https://beds24.com/booking.php&formTarget=_blank&maxNumNight=30&minNumNight=1&noExternalFonts=false&peopleSelection=2&showLabels=true&weekFirstDay=1&widgetLang=en&widgetTitle=Book Your Stay&widgetType=BookingBox&width=100%" 
+                      src="https://beds24.com/booking2.php?ownerid=75780&advancedays=0&referer=iframe&propid=75780" 
                       width="100%" 
                       height="800" 
                       className="w-full border-0 rounded-xl"
@@ -488,6 +488,21 @@ export default function DemoPage() {
                       frameBorder="0"
                       allowFullScreen
                     />
+                    
+                    {/* Fallback message if widget doesn't load */}
+                    <div className="mt-4 text-center">
+                      <p className="text-sm text-gray-500 mb-2">
+                        If the booking widget doesn't load, you can book directly at:
+                      </p>
+                      <a 
+                        href="https://beds24.com/booking2.php?ownerid=75780&referer=apple-widget-demo" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-4 py-2 rounded-full bg-black text-white text-sm font-medium hover:bg-gray-800 transition-all duration-200"
+                      >
+                        Book on Beds24
+                      </a>
+                    </div>
                   </div>
                   
                   {/* Apple-style footer */}
