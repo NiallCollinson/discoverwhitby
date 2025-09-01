@@ -12,6 +12,7 @@ export default function HamburgerMenu() {
   const routes: RouteItem[] = useMemo(() => [
     { href: "/", label: "Home" },
     { href: "/properties", label: "All properties" },
+    { href: "/demo", label: "Beds24 Widget Demo" },
     { href: "/property/bluegrass-cottage", label: "Bluegrass Cottage (example)" },
     { href: "/auth/sign-in", label: "Sign in" },
   ], []);

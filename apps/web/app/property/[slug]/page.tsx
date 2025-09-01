@@ -8,11 +8,84 @@ import PhotoCarousel from "@/app/components/PhotoCarousel";
 import AvailabilityWidget from "@/src/components/AvailabilityWidget";
 import PropertyDetailsWidget from "@/src/components/PropertyDetailsWidget";
 import PropertyAvailabilityCalendar from "@/src/components/PropertyAvailabilityCalendar";
+import { PropertiesExplorer } from "@/app/components/PropertiesExplorer";
 
 export default async function PropertyPage({ params }: { params: { slug: string } }) {
   const FILLER = "/photos/5%20Starfish/Full%20Res/5Starfish_FullRes-1.jpg";
   const slug = params.slug;
   const hasDb = Boolean(process.env.DATABASE_URL);
+  
+  // Fetch properties for the PropertiesExplorer component
+  let allProperties: Array<{ id: string; slug: string; title: string; priceNight: number; bedrooms: number; maxGuests: number; coverImage?: string }> = [];
+  if (!hasDb) {
+    const adapter = createBeds24Adapter({ apiKey: process.env.BEDS24_API_KEY, account: process.env.BEDS24_ACCOUNT });
+    try {
+      const live = await fetchBeds24Properties();
+      if (live && live.length) {
+        allProperties = await Promise.all(live.map(async (p: any) => {
+          const propSlug = slugify(String(p.name ?? ""));
+          const local = await getLocalCover(propSlug);
+          return {
+            id: String(p.id),
+            slug: propSlug,
+            title: String(p.name ?? "Untitled"),
+            priceNight: p.priceNight ?? 100,
+            bedrooms: p.bedrooms ?? 1,
+            maxGuests: p.maxGuests ?? 2,
+            coverImage: local ?? (p.images?.[0]?.url as string | undefined),
+          };
+        }));
+      }
+      if (!allProperties || allProperties.length === 0) {
+        const listings = await adapter.fetchListings();
+        allProperties = await Promise.all(listings.map(async (l) => {
+          const propSlug = slugify(l.name);
+          const local = await getLocalCover(propSlug);
+          return {
+            id: l.id,
+            slug: propSlug,
+            title: l.name,
+            priceNight: l.priceNight ?? 100,
+            bedrooms: l.bedrooms ?? 1,
+            maxGuests: l.maxGuests ?? 2,
+            coverImage: local ?? l.images[0]?.url,
+          };
+        }));
+      }
+    } catch {
+      allProperties = await Promise.all([
+        { id: "demo-1", slug: "demo-1", title: "Harbour View Cottage", priceNight: 120, bedrooms: 2, maxGuests: 4 },
+        { id: "demo-2", slug: "demo-2", title: "Abbey Loft Apartment", priceNight: 90, bedrooms: 1, maxGuests: 2 },
+        { id: "demo-3", slug: "demo-3", title: "Sea Breeze House", priceNight: 180, bedrooms: 3, maxGuests: 6 },
+      ].map(async (r) => ({ ...r, coverImage: await getLocalCover(r.slug) })));
+    }
+  } else {
+    const { prisma } = await import("@discoverwhitby/db");
+    const rows = await prisma.property.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 12,
+      select: { id: true, slug: true, title: true, priceNight: true, bedrooms: true, maxGuests: true, images: { select: { url: true } } },
+    });
+    allProperties = await Promise.all(rows.map(async (r) => ({
+      id: r.id,
+      slug: r.slug,
+      title: r.title,
+      priceNight: r.priceNight,
+      bedrooms: r.bedrooms,
+      maxGuests: r.maxGuests,
+      coverImage: (await getLocalCover(r.slug)) ?? (r as any).images?.[0]?.url,
+    })));
+  }
+  
+  // Randomize cover images and sample a subset for the explorer
+  try {
+    const globalPhotos = await getAllLocalPhotos3000();
+    if (globalPhotos.length) {
+      const pick = () => globalPhotos[Math.floor(Math.random() * globalPhotos.length)];
+      allProperties = allProperties.map((p) => ({ ...p, coverImage: pick() }));
+    }
+  } catch {}
+  const sampleProperties = allProperties.slice().sort(() => Math.random() - 0.5).slice(0, 6);
   if (!hasDb) {
     const adapter = createBeds24Adapter({ apiKey: process.env.BEDS24_API_KEY, account: process.env.BEDS24_ACCOUNT });
     const listings = await adapter.fetchListings();
@@ -156,6 +229,9 @@ export default async function PropertyPage({ params }: { params: { slug: string 
             </div>
           ) : null}
         </div>
+        
+        {/* Properties Explorer with search functionality */}
+        <PropertiesExplorer items={sampleProperties} hasDb={hasDb} />
       </>
     );
   }
@@ -183,6 +259,9 @@ export default async function PropertyPage({ params }: { params: { slug: string 
 
           
         </div>
+        
+        {/* Properties Explorer with search functionality */}
+        <PropertiesExplorer items={sampleProperties} hasDb={hasDb} />
       </>
     );
   } catch {
@@ -199,6 +278,9 @@ export default async function PropertyPage({ params }: { params: { slug: string 
           <PhotoCarousel images={[hero, ...gallery]} alt={titleGuess} />
           <div className="mt-6 text-2xl font-semibold">{titleGuess}</div>
         </div>
+        
+        {/* Properties Explorer with search functionality */}
+        <PropertiesExplorer items={sampleProperties} hasDb={hasDb} />
       </>
     );
   }
