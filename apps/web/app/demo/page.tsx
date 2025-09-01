@@ -470,38 +470,89 @@ export default function DemoPage() {
                     <p className="text-sm text-gray-600">Select dates, choose your property, and book instantly</p>
                   </div>
                   
-                  {/* Beds24 Widget Container - Using iframe with comprehensive Apple-style parameters */}
+                  {/* Apple-Style Booking Widget - Demo Version */}
                   <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-200 p-6">
-                    <iframe 
-                      src="https://beds24.com/booking2.php?ownerid=75780&advancedays=0&referer=iframe&propid=75780" 
-                      width="100%" 
-                      height="800" 
-                      className="w-full border-0 rounded-xl"
-                      style={{
-                        maxWidth: '100%',
-                        border: 'none',
-                        overflow: 'auto',
-                        minHeight: '800px',
-                        backgroundColor: 'transparent'
-                      }}
-                      title="Apple-Style Beds24 Booking Widget"
-                      frameBorder="0"
-                      allowFullScreen
-                    />
-                    
-                    {/* Fallback message if widget doesn't load */}
-                    <div className="mt-4 text-center">
-                      <p className="text-sm text-gray-500 mb-2">
-                        If the booking widget doesn't load, you can book directly at:
-                      </p>
-                      <a 
-                        href="https://beds24.com/booking2.php?ownerid=75780&referer=apple-widget-demo" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center px-4 py-2 rounded-full bg-black text-white text-sm font-medium hover:bg-gray-800 transition-all duration-200"
-                      >
-                        Book on Beds24
-                      </a>
+                    <div className="bg-white rounded-xl shadow-lg p-8">
+                      <div className="text-center mb-6">
+                        <h6 className="text-lg font-semibold text-gray-900 mb-2">Book Your Stay</h6>
+                        <p className="text-sm text-gray-600">Select dates and guests for your Whitby getaway</p>
+                      </div>
+                      
+                      <div className="space-y-6">
+                        {/* Property Selection */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Property</label>
+                          <select className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-200 bg-white text-gray-900">
+                            <option>Harbour View Cottage</option>
+                            <option>Abbey Loft Apartment</option>
+                            <option>Seaside Retreat</option>
+                            <option>Historic Townhouse</option>
+                          </select>
+                        </div>
+                        
+                        {/* Date Selection */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Check-in</label>
+                            <input 
+                              type="date" 
+                              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-200 bg-white text-gray-900"
+                              min={new Date().toISOString().split('T')[0]}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Check-out</label>
+                            <input 
+                              type="date" 
+                              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-200 bg-white text-gray-900"
+                              min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                            />
+                          </div>
+                        </div>
+                        
+                        {/* Guest Selection */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Guests</label>
+                          <select className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all duration-200 bg-white text-gray-900">
+                            <option value="1">1 Guest</option>
+                            <option value="2" selected>2 Guests</option>
+                            <option value="3">3 Guests</option>
+                            <option value="4">4 Guests</option>
+                            <option value="5">5 Guests</option>
+                            <option value="6">6 Guests</option>
+                          </select>
+                        </div>
+                        
+                        {/* Pricing Display */}
+                        <div className="bg-gray-50 rounded-xl p-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm text-gray-600">2 nights</span>
+                            <span className="text-sm font-medium text-gray-900">£180</span>
+                          </div>
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm text-gray-600">Service fee</span>
+                            <span className="text-sm font-medium text-gray-900">£18</span>
+                          </div>
+                          <div className="border-t border-gray-200 pt-2">
+                            <div className="flex justify-between items-center">
+                              <span className="font-semibold text-gray-900">Total</span>
+                              <span className="font-semibold text-gray-900">£198</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Book Button */}
+                        <button className="w-full bg-black text-white py-4 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl">
+                          Book Now
+                        </button>
+                        
+                        {/* Demo Notice */}
+                        <div className="text-center">
+                          <p className="text-xs text-gray-500">
+                            This is a demo booking widget. For real bookings, visit our main booking page.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   
