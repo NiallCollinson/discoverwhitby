@@ -29,6 +29,57 @@ export default function DemoPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [quoteLoading, setQuoteLoading] = useState<boolean>(false);
 
+  // Initialize Beds24 Apple-style widget
+  useEffect(() => {
+    // Load Beds24 widget script
+    const script = document.createElement('script');
+    script.src = 'https://media.xmlcal.com/widget/1.00/js/bookWidget.min.js';
+    script.onload = () => {
+      // Initialize the Apple-style widget
+      if ((window as any).bookWidget) {
+        (window as any).$('#bookWidget-75780-0-1234567890').bookWidget({
+          propid: 75780,
+          formAction: 'https://beds24.com/booking.php',
+          widgetLang: 'en',
+          widgetType: 'BookingBox',
+          widgetTitle: 'Book Your Stay',
+          width: '100%',
+          alignment: 'center',
+          backgroundColor: '#ffffff',
+          borderColor: '#e5e7eb',
+          color: '#111827',
+          buttonBackgroundColor: '#000000',
+          buttonColor: '#ffffff',
+          boxShadow: true,
+          fontSize: '16px',
+          dateSelection: 2,
+          defaultNumAdult: 2,
+          defaultNumChild: 0,
+          peopleSelection: 2,
+          showLabels: true,
+          dateFormat: 'dd/mm/yy',
+          weekFirstDay: 1,
+          customParameter: 'theme=apple'
+        });
+      }
+    };
+    document.head.appendChild(script);
+
+    // Load jQuery if not already loaded
+    if (!(window as any).jQuery) {
+      const jqueryScript = document.createElement('script');
+      jqueryScript.src = 'https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js';
+      document.head.appendChild(jqueryScript);
+    }
+
+    return () => {
+      // Cleanup
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, []);
+
   // Fetch Beds24 properties on component mount
   useEffect(() => {
     const fetchProperties = async () => {
@@ -169,7 +220,76 @@ export default function DemoPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <>
+      {/* Custom CSS for Apple-style Beds24 widget */}
+      <style jsx global>{`
+        .apple-style-widget .book-widget {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+          border-radius: 20px !important;
+          overflow: hidden !important;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+          border: none !important;
+        }
+
+        .apple-style-widget .book-widget input,
+        .apple-style-widget .book-widget select {
+          border-radius: 12px !important;
+          border: 2px solid #e5e7eb !important;
+          padding: 16px !important;
+          font-size: 16px !important;
+          transition: all 0.2s ease !important;
+          background-color: #ffffff !important;
+        }
+
+        .apple-style-widget .book-widget input:focus,
+        .apple-style-widget .book-widget select:focus {
+          border-color: #000000 !important;
+          box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1) !important;
+          outline: none !important;
+        }
+
+        .apple-style-widget .book-widget button {
+          border-radius: 25px !important;
+          padding: 16px 32px !important;
+          font-weight: 600 !important;
+          letter-spacing: -0.025em !important;
+          transition: all 0.2s ease !important;
+          background-color: #000000 !important;
+          color: #ffffff !important;
+          border: none !important;
+        }
+
+        .apple-style-widget .book-widget button:hover {
+          transform: translateY(-2px) !important;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
+          background-color: #1f2937 !important;
+        }
+
+        .apple-style-widget .book-widget label {
+          font-weight: 500 !important;
+          color: #374151 !important;
+          margin-bottom: 8px !important;
+          font-size: 14px !important;
+        }
+
+        .apple-style-widget .book-container {
+          padding: 24px !important;
+        }
+
+        .apple-style-widget .book-row {
+          margin-bottom: 20px !important;
+        }
+
+        .apple-style-widget .book-widget-title {
+          font-size: 24px !important;
+          font-weight: 600 !important;
+          color: #111827 !important;
+          margin-bottom: 16px !important;
+          text-align: center !important;
+        }
+      `}</style>
+      
+      <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       {/* Hero Section */}
       <section className="relative bg-white">
         <div className="mx-auto max-w-7xl px-6 py-20">
@@ -370,67 +490,92 @@ export default function DemoPage() {
                 </div>
               </div>
 
-              {/* Beds24 Iframe Widget */}
-              <div className="relative">
+              {/* Apple-Style Beds24 Widget */}
+              <div className="relative mb-12">
                 <div className="text-center mb-8">
-                  <h4 className="text-2xl font-semibold text-gray-900 mb-2 tracking-tight">Live Beds24 Integration</h4>
-                  <p className="text-gray-600">The actual Beds24 booking system</p>
+                  <h4 className="text-2xl font-semibold text-gray-900 mb-2 tracking-tight">Apple-Style Beds24 Widget</h4>
+                  <p className="text-gray-600">Professional Beds24 widget with Apple design aesthetics</p>
                 </div>
                 
-                <div className="rounded-2xl overflow-hidden shadow-xl border border-gray-200">
-                  <iframe 
-                    src="https://beds24.com/booking2.php?ownerid=75780&amp;advancedays=0&amp;referer=iframe" 
-                    width="100%" 
-                    height="2000" 
-                    className="w-full border-0"
-                    style={{
-                      maxWidth: '100%',
-                      border: 'none',
-                      overflow: 'auto',
-                      minHeight: '2000px'
-                    }}
-                    title="Beds24 Booking Widget"
-                    frameBorder="0"
-                    allowFullScreen
-                  />
-                </div>
-                
-                {/* Fallback message in case iframe fails to load */}
-                <div className="mt-8 text-center">
-                  <div className="inline-flex items-center px-6 py-3 rounded-full bg-gray-50 text-gray-600 text-sm border border-gray-200">
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Having trouble?{" "}
-                    <a 
-                      href="https://beds24.com/booking2.php?ownerid=75780&amp;referer=iframe" 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-900 hover:text-gray-700 underline ml-1 font-medium"
-                    >
-                      Book directly on Beds24
-                    </a>
+                {/* Apple-style container for Beds24 widget */}
+                <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 p-8">
+                  {/* Apple-style header */}
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center px-6 py-3 rounded-full bg-black text-white text-sm font-medium mb-4">
+                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      Premium Booking Experience
+                    </div>
+                    <h5 className="text-xl font-semibold text-gray-900 mb-2">Book Your Whitby Stay</h5>
+                    <p className="text-sm text-gray-600">Select dates, choose your property, and book instantly</p>
+                  </div>
+                  
+                  {/* Beds24 Widget Container */}
+                  <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-200 p-6">
+                    <div id="bookWidget-75780-0-1234567890" className="apple-style-widget"></div>
+                  </div>
+                  
+                  {/* Apple-style footer */}
+                  <div className="mt-8 text-center">
+                    <div className="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 text-gray-700 text-sm">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Secure & Professional
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              {/* Custom Footer for the Widget */}
-              <div className="mt-12 p-8 bg-gray-50 rounded-2xl border border-gray-100">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center">
-                      <svg className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+
+              {/* Styled Beds24 Widget */}
+              <div className="relative">
+                <div className="text-center mb-8">
+                  <h4 className="text-2xl font-semibold text-gray-900 mb-2 tracking-tight">Styled Beds24 Widget</h4>
+                  <p className="text-gray-600">Beds24 widget with Apple-style customization</p>
+                </div>
+                
+                {/* Custom styling wrapper for Beds24 widget */}
+                <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 p-8">
+                  <div className="text-center mb-6">
+                    <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-sm font-medium mb-4">
+                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
+                      Powered by Beds24
                     </div>
+                    <h5 className="text-lg font-semibold text-gray-900">Book Your Stay</h5>
+                    <p className="text-sm text-gray-600">Select dates and book directly through our system</p>
                   </div>
-                  <div className="ml-6">
-                    <h4 className="text-xl font-semibold text-gray-900 mb-3 tracking-tight">About This Integration</h4>
-                    <p className="text-gray-600 leading-relaxed">
-                      This booking widget is powered by Beds24, a professional property management system. 
-                      We've seamlessly integrated it into our platform to provide you with a premium booking 
-                      experience while maintaining our sophisticated design aesthetic and brand identity.
-                    </p>
+                  
+                  {/* Beds24 iframe with custom styling */}
+                  <div className="rounded-2xl overflow-hidden border border-gray-200 bg-gray-50">
+                    <iframe 
+                      src="https://beds24.com/booking2.php?ownerid=75780&amp;advancedays=0&amp;referer=iframe" 
+                      width="100%" 
+                      height="1800" 
+                      className="w-full border-0"
+                      style={{
+                        maxWidth: '100%',
+                        border: 'none',
+                        overflow: 'auto',
+                        minHeight: '1800px',
+                        backgroundColor: 'transparent'
+                      }}
+                      title="Beds24 Booking Widget"
+                      frameBorder="0"
+                      allowFullScreen
+                    />
+                  </div>
+                  
+                  {/* Custom footer for the widget */}
+                  <div className="mt-6 text-center">
+                    <div className="inline-flex items-center px-4 py-2 rounded-full bg-gray-50 text-gray-600 text-sm border border-gray-200">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Secure booking powered by Beds24
+                    </div>
                   </div>
                 </div>
               </div>
@@ -517,6 +662,7 @@ export default function DemoPage() {
           </div>
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
