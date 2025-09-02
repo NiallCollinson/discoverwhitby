@@ -1,13 +1,20 @@
 # Whitby Holiday Rentals
 
-This monorepo contains the web app, worker, and shared packages.
+A modern web application for Whitby holiday rentals with integrated Beds24 booking system.
+
+## Features
+
+- **Hero Video Section** - Beautiful Whitby video background
+- **Beds24 Booking Widget** - Full-width integrated booking system
+- **Promotional Content** - Feature highlights and value propositions
+- **Responsive Design** - Works on all devices
 
 ## Quickstart
 
 ```bash
-pnpm i
-cp .env.example .env
-pnpm db:push
+pnpm install
 pnpm dev
 ```
+
+The application will be available at `http://localhost:3000`
 

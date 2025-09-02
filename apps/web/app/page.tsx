@@ -1,83 +1,5 @@
-import { createBeds24Adapter, fetchBeds24Properties } from "@discoverwhitby/integrations";
-import { slugify } from "@/src/lib/slugify";
-import { getLocalCover, getAllLocalPhotos3000 } from "@/src/server/photos/getLocalPhotos";
-import { PropertiesExplorer } from "./components/PropertiesExplorer";
-
 export default async function Home() {
   const heroVideo = process.env.NEXT_PUBLIC_HERO_VIDEO_URL ?? "/hero-whitby.mp4";
-  const hasDb = Boolean(process.env.DATABASE_URL);
-  let properties: Array<{ id: string; slug: string; title: string; priceNight: number; bedrooms: number; maxGuests: number; coverImage?: string }> = [];
-  if (!hasDb) {
-    const adapter = createBeds24Adapter({ apiKey: process.env.BEDS24_API_KEY, account: process.env.BEDS24_ACCOUNT });
-    try {
-      // Try the richer v2 properties list (same source as /properties page)
-      const live = await fetchBeds24Properties();
-      if (live && live.length) {
-        properties = await Promise.all(live.map(async (p: any) => {
-          const slug = slugify(String(p.name ?? ""));
-          const local = await getLocalCover(slug);
-          return {
-            id: String(p.id),
-            slug,
-            title: String(p.name ?? "Untitled"),
-            priceNight: p.priceNight ?? 100,
-            bedrooms: p.bedrooms ?? 1,
-            maxGuests: p.maxGuests ?? 2,
-            coverImage: local ?? (p.images?.[0]?.url as string | undefined),
-          };
-        }));
-      }
-      // Fallback to adapter listings if needed
-      if (!properties || properties.length === 0) {
-        const listings = await adapter.fetchListings();
-        properties = await Promise.all(listings.map(async (l) => {
-          const slug = slugify(l.name);
-          const local = await getLocalCover(slug);
-          return {
-            id: l.id,
-            slug,
-            title: l.name,
-            priceNight: l.priceNight ?? 100,
-            bedrooms: l.bedrooms ?? 1,
-            maxGuests: l.maxGuests ?? 2,
-            coverImage: local ?? l.images[0]?.url,
-          };
-        }));
-      }
-    } catch {
-      // Last-resort demo data
-      properties = await Promise.all([
-        { id: "demo-1", slug: "demo-1", title: "Harbour View Cottage", priceNight: 120, bedrooms: 2, maxGuests: 4 },
-        { id: "demo-2", slug: "demo-2", title: "Abbey Loft Apartment", priceNight: 90, bedrooms: 1, maxGuests: 2 },
-        { id: "demo-3", slug: "demo-3", title: "Sea Breeze House", priceNight: 180, bedrooms: 3, maxGuests: 6 },
-      ].map(async (r) => ({ ...r, coverImage: await getLocalCover(r.slug) })));
-    }
-  } else {
-    const { prisma } = await import("@discoverwhitby/db");
-    const rows = await prisma.property.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 12,
-      select: { id: true, slug: true, title: true, priceNight: true, bedrooms: true, maxGuests: true, images: { select: { url: true } } },
-    });
-    properties = await Promise.all(rows.map(async (r) => ({
-      id: r.id,
-      slug: r.slug,
-      title: r.title,
-      priceNight: r.priceNight,
-      bedrooms: r.bedrooms,
-      maxGuests: r.maxGuests,
-      coverImage: (await getLocalCover(r.slug)) ?? (r as any).images?.[0]?.url,
-    })));
-  }
-  // Randomize cover images similar to /properties page and sample a subset for the homepage
-  try {
-    const globalPhotos = await getAllLocalPhotos3000();
-    if (globalPhotos.length) {
-      const pick = () => globalPhotos[Math.floor(Math.random() * globalPhotos.length)];
-      properties = properties.map((p) => ({ ...p, coverImage: pick() }));
-    }
-  } catch {}
-  const sample = properties.slice().sort(() => Math.random() - 0.5).slice(0, 6);
 
   return (
     <main className="min-h-screen">
@@ -94,37 +16,35 @@ export default async function Home() {
           <div>
             <h1 className="text-3xl font-semibold text-black sm:text-4xl lg:text-5xl">Discover Whitby</h1>
             <p className="mt-3 max-w-2xl text-black/80">Get away for less, cottages and more starting at £50 a night!</p>
-            <a href="/properties" className="mt-6 inline-flex rounded-md bg-white/90 px-4 py-2 text-sm font-medium text-black hover:bg-white">
-              Properties
+            <a href="#booking" className="mt-6 inline-flex rounded-md bg-white/90 px-4 py-2 text-sm font-medium text-black hover:bg-white">
+              Book Now
             </a>
           </div>
         </div>
       </section>
       
       {/* Beds24 Booking Widget */}
-      <section className="py-16 bg-white">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-semibold text-gray-900 mb-4 tracking-tight">Book Your Stay</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">Check availability and book your Whitby accommodation directly through our secure booking system.</p>
-          </div>
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 overflow-hidden">
-              <iframe 
-                src="https://beds24.com/booking2.php?ownerid=73864&numadult=2&advancedays=0&referer=iframe" 
-                width="2000" 
-                height="2000" 
-                style={{maxWidth: '100%', border: 'none', overflow: 'auto'}}
-                title="Beds24 Booking Widget"
-                frameBorder="0"
-                allowFullScreen
-                className="w-full border-0"
-              />
-              <div className="mt-6 text-center">
-                <p className="text-sm text-gray-500">
-                  Having trouble with the widget? <a href="https://beds24.com/booking2.php?ownerid=73864&referer=iframe" className="text-blue-600 hover:text-blue-800 underline">Book directly here</a>
-                </p>
-              </div>
+      <section id="booking" className="py-16 bg-white">
+        <div className="text-center mb-12 px-6">
+          <h2 className="text-3xl font-semibold text-gray-900 mb-4 tracking-tight">Book Your Stay</h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">Check availability and book your Whitby accommodation directly through our secure booking system.</p>
+        </div>
+        <div className="w-full">
+          <div className="bg-white border-t border-b border-gray-200 overflow-hidden">
+            <iframe 
+              src="https://beds24.com/booking2.php?ownerid=73864&numadult=2&advancedays=0&referer=iframe" 
+              width="100%" 
+              height="2000" 
+              style={{border: 'none', overflow: 'auto'}}
+              title="Beds24 Booking Widget"
+              frameBorder="0"
+              allowFullScreen
+              className="w-full border-0"
+            />
+            <div className="text-center py-6 bg-white border-t border-gray-200">
+              <p className="text-sm text-gray-500">
+                Having trouble with the widget? <a href="https://beds24.com/booking2.php?ownerid=73864&referer=iframe" className="text-blue-600 hover:text-blue-800 underline">Book directly here</a>
+              </p>
             </div>
           </div>
         </div>

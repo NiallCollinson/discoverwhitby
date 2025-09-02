@@ -20,11 +20,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} bg-white text-black dark:bg-white dark:text-black`}>
         <header className="border-b relative z-40">
-          <div className="mx-auto max-w-7xl px-6 py-4">
-            <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between py-4">
+            <div className="flex-shrink-0 pl-6">
               <Link href="/" className="text-lg font-semibold hover:opacity-80">
                 Discover Whitby
               </Link>
+            </div>
+            <div className="flex-shrink-0 pr-6">
               <HamburgerMenu />
             </div>
           </div>
