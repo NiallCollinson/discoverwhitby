@@ -100,7 +100,89 @@ export default async function Home() {
           </div>
         </div>
       </section>
-      <PropertiesExplorer items={sample} hasDb={hasDb} />
+      
+      {/* Beds24 Booking Widget */}
+      <section className="py-16 bg-white">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-semibold text-gray-900 mb-4 tracking-tight">Book Your Stay</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">Check availability and book your Whitby accommodation directly through our secure booking system.</p>
+          </div>
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 overflow-hidden">
+              <iframe 
+                src="https://beds24.com/booking2.php?ownerid=73864&numadult=2&advancedays=0&referer=iframe" 
+                width="2000" 
+                height="2000" 
+                style={{maxWidth: '100%', border: 'none', overflow: 'auto'}}
+                title="Beds24 Booking Widget"
+                frameBorder="0"
+                allowFullScreen
+                className="w-full border-0"
+              />
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-500">
+                  Having trouble with the widget? <a href="https://beds24.com/booking2.php?ownerid=73864&referer=iframe" className="text-blue-600 hover:text-blue-800 underline">Book directly here</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Promotional Sections */}
+      <section className="py-16 bg-gray-50">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-semibold text-gray-900 mb-4 tracking-tight">Why Choose Whitby?</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">Discover the charm and beauty of our coastal town</p>
+          </div>
+          
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white p-4 text-sm font-medium">
+              <span aria-hidden="true">🐾</span>
+              <span>PET FRIENDLY</span>
+            </div>
+            <div className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white p-4 text-sm font-medium">
+              <span aria-hidden="true">🅿️</span>
+              <span>PARKING</span>
+            </div>
+            <div className="flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white p-4 text-sm font-medium">
+              <span aria-hidden="true">💷</span>
+              <span>FANTASTIC VALUE</span>
+            </div>
+          </div>
+          
+          <div className="mt-10 rounded-lg border border-gray-200 bg-white p-6 text-center">
+            <div className="text-lg font-semibold">The longer the stay, the bigger the discount</div>
+            <div className="mt-2 text-sm text-gray-600">Save more when you book 7+ nights.</div>
+          </div>
+        </div>
+      </section>
+      
+      <section className="py-16 bg-white">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="rounded-xl border border-gray-200 bg-white p-8">
+              <div className="text-xl font-semibold">Free parking</div>
+              <p className="mt-1 text-gray-600">Stays with on-site parking included.</p>
+            </div>
+            <div className="rounded-xl border border-gray-200 bg-white p-8">
+              <div className="text-xl font-semibold">Large houses</div>
+              <p className="mt-1 text-gray-600">Space for the whole group.</p>
+            </div>
+            <div className="rounded-xl border border-gray-200 bg-white p-8">
+              <div className="text-xl font-semibold">Why book with us</div>
+              <ul className="mt-3 grid list-disc gap-2 pl-5 text-gray-700 sm:grid-cols-2">
+                <li>Best price guaranteed</li>
+                <li>Verified local hosts</li>
+                <li>Secure payments</li>
+                <li>Flexible cancellation on many stays</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
