@@ -11,10 +11,8 @@ export default function HamburgerMenu() {
   // Static sitemap; extend as new routes are added
   const routes: RouteItem[] = useMemo(() => [
     { href: "/", label: "Home" },
-    { href: "/properties", label: "All properties" },
-    { href: "/demo", label: "Beds24 Widget Demo" },
-    { href: "/property/bluegrass-cottage", label: "Bluegrass Cottage (example)" },
-    { href: "/auth/sign-in", label: "Sign in" },
+    { href: "/about", label: "About Us" },
+    { href: "/terms", label: "Terms & Conditions" },
   ], []);
 
   useEffect(() => {
